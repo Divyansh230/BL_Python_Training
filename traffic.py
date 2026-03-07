@@ -1,3 +1,5 @@
+from queue import Queue
+
 second=int(input("enter second"))
 
 if 0 < second <= 30:
