@@ -1,0 +1,11 @@
+Real Life Use Cases
+
+Log files read karna
+
+Data save karna (user input)
+
+CSV / JSON data processing
+
+Machine Learning datasets load karna
+
+Agar chaho to mai tumhe Python file handling ke interview questions + coding examples (jo exam me aate hain) bhi bata sakta hoon.
