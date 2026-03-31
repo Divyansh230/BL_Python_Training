@@ -1,0 +1,143 @@
+import pandas as pd
+import numpy as np
+df=pd.read_csv("C:\\Users\\ACER\\Downloads\\BigMart Sales.csv")
+
+---
+
+class DataHandler:
+
+    def preprocess(self,df):
+
+
+        df['Item_Weight'].fillna(df['Item_Weight'].mean(), inplace=True)
+        df['Item_Visibility'] = df['Item_Visibility'].replace(0, np.nan)
+        df['Item_Visibility'].fillna(df['Item_Visibility'].mean(), inplace=True)
+
+    def calculate_age(self,df):
+        CURRENT_YEAR = 2026
+        df['Outlet_Age'] = CURRENT_YEAR - df['Outlet_Establishment_Year']
+        df['Outlet_Age']
+
+
+    def remove_outlier(self,df):
+        Q1 = df['Item_Outlet_Sales'].quantile(0.25)
+        Q3 = df['Item_Outlet_Sales'].quantile(0.75)
+        IQR = Q3 - Q1
+
+        lower = Q1 - 1.5 * IQR
+        upper = Q3 + 1.5 * IQR
+
+        df = df[(df['Item_Outlet_Sales'] >= lower) & (df['Item_Outlet_Sales'] <= upper)]
+
+
+    def data_normalizer(self,df):
+        df['Normalized_Sales'] = (
+            (df['Item_Outlet_Sales'] - np.mean(df['Item_Outlet_Sales'])) /
+            np.std(df['Item_Outlet_Sales'])
+        )
+
+        df['Rolling_Sales'] = df['Item_Outlet_Sales'].rolling(5).mean()
+
+
+
+---
+
+
+df['Item_Weight'].fillna(df['Item_Weight'].mean(), inplace=True)
+df['Item_Visibility'] = df['Item_Visibility'].replace(0, np.nan)
+df['Item_Visibility'].fillna(df['Item_Visibility'].mean(), inplace=True)
+
+---
+
+CURRENT_YEAR = 2026
+df['Outlet_Age'] = CURRENT_YEAR - df['Outlet_Establishment_Year']
+df['Outlet_Age']
+
+---
+
+Q1 = df['Item_Outlet_Sales'].quantile(0.25)
+Q3 = df['Item_Outlet_Sales'].quantile(0.75)
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+df = df[(df['Item_Outlet_Sales'] >= lower) & (df['Item_Outlet_Sales'] <= upper)]
+
+---
+
+
+df['Normalized_Sales'] = (
+    (df['Item_Outlet_Sales'] - np.mean(df['Item_Outlet_Sales'])) /
+    np.std(df['Item_Outlet_Sales'])
+)
+
+df['Rolling_Sales'] = df['Item_Outlet_Sales'].rolling(5).mean()
+
+---
+
+avg_sales = df.groupby(['Outlet_Identifier', 'Item_Identifier'])['Item_Outlet_Sales'].mean()
+print(avg_sales.head())
+
+---
+
+size_map = {'Small': 1000, 'Medium': 2000, 'High': 3000}
+df['Size_Value'] = df['Outlet_Size'].map(size_map)
+
+df['Sales_Density'] = df['Item_Outlet_Sales'] / df['Size_Value']
+
+---
+
+
+size_perf = df.groupby('Outlet_Size')['Item_Outlet_Sales'].mean()
+type_perf = df.groupby('Outlet_Type')['Item_Outlet_Sales'].mean()
+df['Age_Group'] = pd.cut(df['Outlet_Age'], bins=3)
+age_perf = df.groupby('Age_Group')['Item_Outlet_Sales'].mean()
+print(size_perf, type_perf, age_perf)
+
+---
+
+outlet_sales=df.groupby('Outlet_Identifier')['Item_Outlet_Sales'].mean()
+threshold=outlet_sales.mean()
+underperforming=outlet_sales[outlet_sales<threshold]
+underperforming
+
+---
+
+import matplotlib.pyplot as plt
+
+size_sales = df.groupby('Outlet_Size')['Item_Outlet_Sales'].mean()
+
+plt.bar(size_sales.index, size_sales.values)
+plt.title("Outlet Size vs Avg Sales")
+plt.xlabel("Outlet Size")
+plt.ylabel("Sales")
+plt.show()
+
+---
+
+import seaborn as sns
+heatmap_data=df.pivot_table(
+    values='Item_Outlet_Sales',
+    index='Outlet_Size',
+    columns='Outlet_Identifier',
+    aggfunc='mean'
+)
+
+plt.figure(figsize=(10,6))
+
+sns.heatmap(
+    heatmap_data,
+    annot=True,
+    fmt='.1f',
+    cmap='coolwarm',
+    linewidths=.5,
+)
+
+plt.title('Heatmap')
+plt.show()
+
+
+
+---
+
